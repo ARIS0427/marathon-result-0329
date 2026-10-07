@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>成绩查询 - 2026“高地加速度”环校马拉松</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;background:#eef1f5;color:#222;min-height:100vh;padding-bottom:36px}
+.banner{background:linear-gradient(135deg,#c1272d 0%,#8f1a20 55%,#5d1014 100%);color:#fff;padding:20px 16px 18px;text-align:center;position:relative;overflow:hidden}
+.banner::after{content:"";position:absolute;left:-20%;top:-60px;width:140%;height:120px;background:rgba(255,255,255,.07);transform:rotate(-6deg)}
+.banner .eyebrow{font-size:12px;letter-spacing:2px;opacity:.85;position:relative}
+.banner h1{font-size:17px;line-height:1.5;margin-top:7px;font-weight:600;position:relative}
+.banner .sub{font-size:11.5px;opacity:.8;margin-top:6px;position:relative;letter-spacing:.5px}
+.card{background:#fff;border-radius:10px;margin:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.form-row{display:flex;align-items:center;margin-bottom:12px}
+.form-row label{width:76px;flex:none;color:#333;font-size:15px}
+.form-row input{flex:1;height:44px;border:1px solid #dcdfe4;border-radius:6px;padding:0 12px;font-size:16px;background:#fafbfc;outline:none;-webkit-appearance:none}
+.form-row input:focus{border-color:#c1272d;background:#fff}
+.btn{width:100%;height:46px;border:0;border-radius:6px;background:#c1272d;color:#fff;font-size:16.5px;font-weight:600;letter-spacing:2px;margin-top:4px;cursor:pointer}
+.btn:active{background:#a81f24}
+.tip{color:#98a0a8;font-size:12px;margin-top:10px;text-align:center;line-height:1.6}
+.result{display:none;margin:12px;background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.result.show{display:block}
+.result h2{font-size:15.5px;text-align:center;color:#1b1b1b;font-weight:600;line-height:1.5}
+.result .race{text-align:center;color:#8a929a;font-size:13px;margin-top:6px}
+.hr{height:1px;background:#eceff3;margin:14px 0}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 2px;font-size:15px}
+.row span:first-child{color:#5c646c}
+.row span:last-child{font-weight:600;font-variant-numeric:tabular-nums}
+.big span:last-child{color:#c1272d;font-size:19px;letter-spacing:.5px}
+.empty{display:none;margin:12px;background:#fff;border-radius:10px;padding:26px 16px;text-align:center;color:#8a929a;font-size:14px;line-height:1.8;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.empty.show{display:block}
+.empty b{color:#c1272d}
+.foot{text-align:center;color:#a7aeb6;font-size:11.5px;margin-top:18px;line-height:1.8;padding:0 20px}
+</style>
+</head>
+<body>
+<div class="banner">
+  <div class="eyebrow">MARATHON RESULT</div>
+  <h1>2026“高地加速度”<br>环校马拉松</h1>
+  <div class="sub">成绩查询 / Result Inquiry</div>
+</div>
+
+<div class="card">
+  <div class="form-row">
+    <label>姓名</label>
+    <input id="nm" type="text" autocomplete="off" placeholder="请输入参赛者姓名">
+  </div>
+  <div class="form-row">
+    <label>参赛号</label>
+    <input id="no" type="text" inputmode="numeric" autocomplete="off" placeholder="请输入参赛号">
+  </div>
+  <button class="btn" id="go">查 询</button>
+  <div class="tip">请输入本人姓名与参赛号查询成绩</div>
+</div>
+
+<div class="empty" id="empty"></div>
+
+<div class="result" id="result">
+  <h2 id="rName"></h2>
+  <div class="race">(官方)2026“高地加速度”环校马拉松</div>
+  <div class="hr"></div>
+  <div class="row"><span>姓名</span><span id="fName"></span></div>
+  <div class="row"><span>性别</span><span id="fSex"></span></div>
+  <div class="row"><span>参赛号</span><span id="fNo"></span></div>
+  <div class="row"><span>项目</span><span id="fItem"></span></div>
+  <div class="row"><span>时间</span><span id="fDate"></span></div>
+  <div class="hr"></div>
+  <div class="row big"><span>枪声成绩</span><span id="fGun"></span></div>
+  <div class="row big"><span>净成绩</span><span id="fNet"></span></div>
+</div>
+
+<div class="foot">
+  成绩仅供参考，解释权归组委会<br>
+  计时服务：赛虎计时
+</div>
+
+<script>
+var DB = {
+  '21836': {
+    name: '蒋子睿',
+    sex: '女',
+    item: '半程马拉松',
+    date: '2026-03-29',
+    gun: '02:12:53',
+    net: '02:12:45'
+  }
+};
+
+function $(id){ return document.getElementById(id); }
+
+function norm(s){
+  return String(s == null ? '' : s)
+    .replace(/[\u3000\s]/g, '')
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(c){
+      return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+    })
+    .toUpperCase();
+}
+
+function showEmpty(html){
+  $('result').className = 'result';
+  var e = $('empty');
+  e.innerHTML = html;
+  e.className = 'empty show';
+  e.scrollIntoView({block:'center'});
+}
+
+function query(){
+  var no = norm($('no').value);
+  var nm = norm($('nm').value);
+
+  if(!nm){ showEmpty('请输入姓名'); return; }
+  if(!no){ showEmpty('请输入参赛号'); return; }
+
+  var rec = DB[no];
+  if(!rec || norm(rec.name) !== nm){
+    showEmpty('未查询到成绩记录<br>请核对<b>姓名</b>与<b>参赛号</b>是否正确');
+    return;
+  }
+
+  $('empty').className = 'empty';
+  $('rName').textContent = rec.name;
+  $('fName').textContent = rec.name;
+  $('fSex').textContent = rec.sex;
+  $('fNo').textContent = no;
+  $('fItem').textContent = rec.item;
+  $('fDate').textContent = rec.date;
+  $('fGun').textContent = rec.gun;
+  $('fNet').textContent = rec.net;
+  $('result').className = 'result show';
+  $('result').scrollIntoView({block:'start'});
+}
+
+$('go').addEventListener('click', query);
+$('nm').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ query(); } });
+$('no').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ query(); } });
+
+/* 带参数直达会自动查询：?name=蒋子睿&no=21836 */
+(function(){
+  var p = {};
+  location.search.replace(/^\?/, '').split('&').forEach(function(kv){
+    var i = kv.indexOf('=');
+    if(i > 0){ p[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); }
+  });
+  if(p.name){ $('nm').value = p.name; }
+  if(p.no){ $('no').value = p.no; }
+  if(p.name && p.no){ query(); }
+})();
+</script>
+</body>
+</html>
